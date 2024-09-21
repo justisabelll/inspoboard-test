@@ -5,45 +5,37 @@ import { Icon } from '@iconify/react';
 import { Button } from '@/components/ui/button';
 import { TileGrid } from '@/components/tile-grid';
 import { ModeToggle } from '@/components/mode-toggle';
-const initialItems = [
-  { type: 'image', content: 'https://placehold.co/600x400' },
-  {
-    type: 'quote',
-    content: 'The only way to do great work is to love what you do.',
-  },
-  { type: 'youtube', content: 'https://www.youtube.com/embed/------' },
-  { type: 'image', content: 'https://placehold.co/600x400' },
-  { type: 'quote', content: "Believe you can and you're halfway there." },
-  { type: 'image', content: 'https://placehold.co/600x400' },
-  { type: 'quote', content: 'Stay hungry, stay foolish.' },
-  { type: 'image', content: 'https://placehold.co/600x400' },
-  { type: 'youtube', content: 'https://www.youtube.com/embed/------' },
-  {
-    type: 'quote',
-    content:
-      'The future belongs to those who believe in the beauty of their dreams.',
-  },
-  { type: 'image', content: 'https://placehold.co/600x400' },
-  { type: 'quote', content: "It always seems impossible until it's done." },
-  { type: 'image', content: 'https://placehold.co/600x400' },
-  { type: 'youtube', content: 'https://www.youtube.com/embed/------' },
-  { type: 'image', content: 'https://placehold.co/600x400' },
-  {
-    type: 'quote',
-    content: 'The best way to predict the future is to invent it.',
-  },
-];
+import { client } from '@/lib/rpc';
+import { useQuery } from '@tanstack/react-query';
 
 export default function InspirationBoard() {
-  const [items] = useState(initialItems);
   const [filter, setFilter] = useState('all');
 
-  const handleUpload = () => {
-    alert('Upload functionality would be implemented here');
-  };
+  const items = useQuery({
+    queryKey: ['items'],
+    queryFn: async () => {
+      const res = await client.items.$get();
+      const data = await res.json();
+      return data;
+    },
+  });
+
+  // function handleUpload() {
+  //   alert('Upload');
+  // }
+
+  const hello = useQuery({
+    queryKey: ['hello'],
+    queryFn: async () => {
+      const res = await client.hello.$post({ json: { name: 'World' } });
+      return res.json();
+    },
+  });
 
   const filteredItems =
-    filter === 'all' ? items : items.filter((item) => item.type === filter);
+    filter === 'all'
+      ? items.data
+      : items.data?.filter((item) => item.type === filter);
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
@@ -96,10 +88,13 @@ export default function InspirationBoard() {
           ))}
         </div>
 
-        <TileGrid items={filteredItems} />
+        <TileGrid items={filteredItems ?? []} />
       </div>
       <Button
-        onClick={handleUpload}
+        onClick={() => {
+          hello.refetch();
+          console.log(hello.data);
+        }}
         size="icon"
         className="fixed right-8 bottom-8 rounded-full shadow-lg bg-secondary text-secondary-foreground hover:bg-secondary/90"
       >
