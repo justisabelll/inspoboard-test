@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { Icon } from '@iconify/react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Tile } from '@/components/tile';
+import { TileGrid } from '@/components/tile-grid';
+import { ModeToggle } from '@/components/mode-toggle';
 const initialItems = [
   { type: 'image', content: 'https://placehold.co/600x400' },
   {
@@ -46,15 +46,16 @@ export default function InspirationBoard() {
     filter === 'all' ? items : items.filter((item) => item.type === filter);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="py-12 mb-12">
-        <h1 className="text-4xl font-extralight tracking-widest text-center">
-          Inspoboard ✨
-        </h1>
+    <div className="flex flex-col min-h-screen bg-background text-foreground">
+      <header className="relative py-12 mb-12">
+        <h1 className="text-6xl font-bold text-center">Inspoboard ✨</h1>
+        <div className="absolute top-0 right-0 p-4">
+          <ModeToggle />
+        </div>
       </header>
 
-      <div className="container mx-auto px-4">
-        <div className="flex justify-center space-x-6 mb-12">
+      <div className="container flex-grow px-4 mx-auto">
+        <div className="flex justify-center mb-12 space-x-6">
           {['all', 'image', 'quote', 'youtube'].map((value) => (
             <button
               key={value}
@@ -66,16 +67,16 @@ export default function InspirationBoard() {
               }`}
             >
               {value === 'all' && (
-                <Icon icon="mdi:inbox-multiple" className="h-4 w-4" />
+                <Icon icon="mdi:inbox-multiple" className="w-4 h-4" />
               )}
               {value === 'image' && (
-                <Icon icon="mdi:image-outline" className="h-4 w-4" />
+                <Icon icon="mdi:image-outline" className="w-4 h-4" />
               )}
               {value === 'quote' && (
-                <Icon icon="mdi:format-quote-close" className="h-4 w-4" />
+                <Icon icon="mdi:format-quote-close" className="w-4 h-4" />
               )}
               {value === 'youtube' && (
-                <Icon icon="mdi:youtube" className="h-4 w-4" />
+                <Icon icon="mdi:youtube" className="w-4 h-4" />
               )}
               <span className="sr-only">
                 {value === 'all'
@@ -88,25 +89,15 @@ export default function InspirationBoard() {
           ))}
         </div>
 
-        <motion.div
-          //@ts-expect-error - TypeScript error due to missing type definition for className
-          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 mb-20"
-          layout
-        >
-          <AnimatePresence>
-            {filteredItems.map((item, index) => (
-              <Tile key={index} item={item} />
-            ))}
-          </AnimatePresence>
-        </motion.div>
+        <TileGrid items={filteredItems} />
       </div>
 
       <Button
         onClick={handleUpload}
         size="icon"
-        className="fixed bottom-8 right-8 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg"
+        className="fixed right-8 bottom-8 rounded-full shadow-lg bg-secondary text-secondary-foreground hover:bg-secondary/90"
       >
-        <Icon icon="mdi:plus" className="h-5 w-5" />
+        <Icon icon="mdi:plus" className="w-5 h-5" />
         <span className="sr-only">Add Inspiration</span>
       </Button>
     </div>

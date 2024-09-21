@@ -3,6 +3,14 @@ export default {
   darkMode: ['class'],
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
+    fontFamily: {
+      sans: ['Geist-Regular', 'sans-serif'],
+      semibold: ['Geist-Semibold', 'sans-serif'],
+      bold: ['Geist-Bold', 'sans-serif'],
+      light: ['Geist-Thin', 'sans-serif'],
+      medium: ['Geist-Medium', 'sans-serif'],
+      black: ['Geist-Black', 'sans-serif'],
+    },
     extend: {
       borderRadius: {
         lg: 'var(--radius)',
