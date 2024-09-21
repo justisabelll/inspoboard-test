@@ -1,18 +1,12 @@
 {
-  "name": "app",
-  "version": "1.0.50",
+  "name": "inspoboard-api",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "bun run --watch src/index.ts"
+    "dev": "bun run --hot src/index.ts"
   },
   "dependencies": {
-    "@elysiajs/trpc": "^1.1.0",
-    "@elysiajs/websocket": "^0.2.8",
-    "@trpc/server": "^10.45.2",
-    "elysia": "latest"
+    "hono": "^4.6.2"
   },
   "devDependencies": {
-    "bun-types": "latest"
-  },
-  "module": "src/index.js"
+    "@types/bun": "latest"
+  }
 }
