@@ -47,10 +47,17 @@ export default function InspirationBoard() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
-      <header className="relative py-12 mb-12">
-        <h1 className="text-6xl font-bold text-center">Inspoboard ✨</h1>
-        <div className="absolute top-0 right-0 p-4">
+      <header className="relative py-16 mb-12">
+        <h1 className="text-6xl font-bold tracking-tight text-center">
+          Inspo<span className="text-primary">board</span>{' '}
+          <span className="animate-pulse">✨</span>
+        </h1>
+        <div className="flex absolute top-4 right-4 gap-3 items-center">
           <ModeToggle />
+          <Button variant="outline" size="sm" className="hover:bg-primary/10">
+            <Icon icon="mdi:login" className="mr-2 w-4 h-4" />
+            Admin Login
+          </Button>
         </div>
       </header>
 
@@ -91,7 +98,6 @@ export default function InspirationBoard() {
 
         <TileGrid items={filteredItems} />
       </div>
-
       <Button
         onClick={handleUpload}
         size="icon"
