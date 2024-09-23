@@ -19,9 +19,21 @@ const insportationTable = sqliteTable('insportation', {
     .references(() => categoryTable.id),
 });
 
+const userTable = sqliteTable('user', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  username: text('username').notNull(),
+  password: text('password').notNull(),
+  created_at: integer('created_at', { mode: 'timestamp' }).notNull(),
+});
+
 // export type DatabaseUser = typeof userTable.$inferSelect;
 
-export type Category = typeof categoryTable.$inferSelect;
-export type Insportation = typeof insportationTable.$inferSelect;
+export type CategorySelectType = typeof categoryTable.$inferSelect;
+export type InsportationSelectType = typeof insportationTable.$inferSelect;
+export type UserSelectType = typeof userTable.$inferSelect;
 
-// export { db, categoryTable, insportationTable };
+export type CategoryInsertType = typeof categoryTable.$inferInsert;
+export type InsportationInsertType = typeof insportationTable.$inferInsert;
+export type UserInsertType = typeof userTable.$inferInsert;
+
+export { db, categoryTable, insportationTable, userTable };

@@ -1,46 +1,22 @@
 import { zValidator } from '@hono/zod-validator';
 import type { JwtVariables } from 'hono/jwt';
-import { cors } from 'hono/cors';
 import { jwt, sign } from 'hono/jwt';
+import { cors } from 'hono/cors';
 import { Hono } from 'hono';
+import { db, insportationTable } from './db';
 import { z } from 'zod';
 
 type Variables = JwtVariables;
 
-const JWT_SECRET = '';
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET is not set');
+}
 
 const app = new Hono<{
   Variables: Variables;
 }>();
-
-const tempData = [
-  { type: 'image', content: 'https://placehold.co/600x400' },
-  {
-    type: 'quote',
-    content: 'The only way to do great work is to love what you do.',
-  },
-  { type: 'youtube', content: 'https://www.youtube.com/embed/------' },
-  { type: 'image', content: 'https://placehold.co/600x400' },
-  { type: 'quote', content: "Believe you can and you're halfway there." },
-  { type: 'image', content: 'https://placehold.co/600x400' },
-  { type: 'quote', content: 'Stay hungry, stay foolish.' },
-  { type: 'image', content: 'https://placehold.co/600x400' },
-  { type: 'youtube', content: 'https://www.youtube.com/embed/------' },
-  {
-    type: 'quote',
-    content:
-      'The future belongs to those who believe in the beauty of their dreams.',
-  },
-  { type: 'image', content: 'https://placehold.co/600x400' },
-  { type: 'quote', content: "It always seems impossible until it's done." },
-  { type: 'image', content: 'https://placehold.co/600x400' },
-  { type: 'youtube', content: 'https://www.youtube.com/embed/------' },
-  { type: 'image', content: 'https://placehold.co/600x400' },
-  {
-    type: 'quote',
-    content: 'The best way to predict the future is to invent it.',
-  },
-];
 
 app.use(
   cors({
@@ -51,28 +27,9 @@ app.use(
 app.use(
   '/protected/*',
   jwt({
-    secret: JWT_SECRET,
+    secret: JWT_SECRET as string,
   })
 );
-
-app.post('/login', async (c) => {
-  const { username, password } = await c.req.json();
-
-  if (username === 'admin' && password === 'admin') {
-    const token = await sign({ username }, JWT_SECRET);
-    return c.json({ token }, 200);
-  }
-  return c.json({ message: 'Invalid credentials' }, 401);
-});
-
-app.get('/', (c) => {
-  return c.text('Hello Hono!');
-});
-
-app.get('/api/protected', (c) => {
-  const payload = c.get('jwtPayload');
-  return c.json({ message: 'This is protected', username: payload.username });
-});
 
 const helloRoute = app.post(
   '/hello',
@@ -88,15 +45,53 @@ const helloRoute = app.post(
   }
 );
 
-const itemsRoute = app.get('/items', (c) => {
-  return c.json(tempData);
+const itemsRoute = app.get('/items', async (c) => {
+  return c.json(await db.select().from(insportationTable).all());
 });
 
-const addItemRoute = app.post('/protected/new-items', async (c) => {
-  const { item } = await c.req.json();
-  tempData.push(item);
-  return c.json(tempData);
+app.post('/login', async (c) => {
+  const { username, password } = await c.req.json();
+
+  if (username === 'admin' && password === 'admin') {
+    const token = await sign({ username }, JWT_SECRET as string);
+    return c.json({ token }, 200);
+  }
+  return c.json({ message: 'Invalid credentials' }, 401);
 });
+
+app.get('/', (c) => {
+  return c.text('Hello Hono!');
+});
+
+app.get('/api/protected', (c) => {
+  const payload = c.get('jwtPayload');
+  return c.json({ message: 'This is protected', username: payload.username });
+});
+
+const addItemRoute = app.post(
+  '/protected/new-items',
+  zValidator(
+    'json',
+    z.object({
+      content: z.string().min(1, { message: 'Content is required' }),
+      category_id: z.number().min(1, { message: 'Category ID is required' }),
+    })
+  ),
+  async (c) => {
+    const { content, category_id } = c.req.valid('json');
+
+    try {
+      await db.insert(insportationTable).values({
+        content: content,
+        category_id: category_id,
+        created_at: new Date(),
+      });
+      return c.json({ message: 'Item added' }, 200);
+    } catch (error) {
+      return c.json({ message: 'Error adding item' }, 500);
+    }
+  }
+);
 
 export type AppRouter = typeof helloRoute &
   typeof itemsRoute &
