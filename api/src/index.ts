@@ -1,9 +1,17 @@
 import { zValidator } from '@hono/zod-validator';
+import type { JwtVariables } from 'hono/jwt';
 import { cors } from 'hono/cors';
+import { jwt, sign } from 'hono/jwt';
 import { Hono } from 'hono';
 import { z } from 'zod';
 
-const app = new Hono();
+type Variables = JwtVariables;
+
+const JWT_SECRET = '';
+
+const app = new Hono<{
+  Variables: Variables;
+}>();
 
 const tempData = [
   { type: 'image', content: 'https://placehold.co/600x400' },
@@ -40,8 +48,30 @@ app.use(
   })
 );
 
+app.use(
+  '/protected/*',
+  jwt({
+    secret: JWT_SECRET,
+  })
+);
+
+app.post('/login', async (c) => {
+  const { username, password } = await c.req.json();
+
+  if (username === 'admin' && password === 'admin') {
+    const token = await sign({ username }, JWT_SECRET);
+    return c.json({ token }, 200);
+  }
+  return c.json({ message: 'Invalid credentials' }, 401);
+});
+
 app.get('/', (c) => {
   return c.text('Hello Hono!');
+});
+
+app.get('/api/protected', (c) => {
+  const payload = c.get('jwtPayload');
+  return c.json({ message: 'This is protected', username: payload.username });
 });
 
 const helloRoute = app.post(
@@ -62,4 +92,16 @@ const itemsRoute = app.get('/items', (c) => {
   return c.json(tempData);
 });
 
-export type AppRouter = typeof helloRoute & typeof itemsRoute;
+const addItemRoute = app.post('/protected/new-items', async (c) => {
+  const { item } = await c.req.json();
+  tempData.push(item);
+  return c.json(tempData);
+});
+
+export type AppRouter = typeof helloRoute &
+  typeof itemsRoute &
+  typeof addItemRoute;
+
+export default app;
+
+console.log('Hono running on port 3000');
