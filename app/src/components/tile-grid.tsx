@@ -1,17 +1,10 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Icon } from '@iconify/react';
 
+import { InsportationSelectType } from '../../../api/src/db';
+
 interface TileGridProps {
-  items: Array<{
-    type: string;
-    content: string;
-  }>;
-}
-interface InspirationTileProps {
-  item: {
-    type: string;
-    content: string;
-  };
+  items: InsportationSelectType[];
 }
 
 export function TileGrid({ items }: TileGridProps) {
@@ -30,7 +23,7 @@ export function TileGrid({ items }: TileGridProps) {
   );
 }
 
-function Tile({ item }: InspirationTileProps) {
+function Tile({ item }: { item: InsportationSelectType }) {
   return (
     <motion.div
       layout
@@ -45,14 +38,14 @@ function Tile({ item }: InspirationTileProps) {
       //@ts-expect-error - TypeScript error due to missing type definition for className
       className="overflow-hidden rounded-lg ring-1 shadow-sm aspect-square bg-card ring-primary/20 hover:ring-primary/40"
     >
-      {item.type === 'image' && (
+      {item.category_id === 2 && (
         <img
           src={item.content}
           alt="Inspiration"
           className="object-cover w-full h-full"
         />
       )}
-      {item.type === 'quote' && (
+      {item.category_id === 3 && (
         <div className="flex flex-col justify-center items-center p-4 h-full text-center bg-accent/10">
           <Icon
             icon="mdi:format-quote-open"
@@ -67,7 +60,7 @@ function Tile({ item }: InspirationTileProps) {
           />
         </div>
       )}
-      {item.type === 'youtube' && (
+      {item.category_id === 1 && (
         <iframe
           src={item.content}
           title="YouTube video"

@@ -7,6 +7,7 @@ import { TileGrid } from '@/components/tile-grid';
 import { ModeToggle } from '@/components/mode-toggle';
 import { client } from '@/lib/rpc';
 import { useQuery } from '@tanstack/react-query';
+import LoginModal from '@/components/login-modal';
 
 export default function InspirationBoard() {
   const [filter, setFilter] = useState('all');
@@ -20,22 +21,19 @@ export default function InspirationBoard() {
     },
   });
 
-  // function handleUpload() {
-  //   alert('Upload');
-  // }
-
-  const hello = useQuery({
-    queryKey: ['hello'],
-    queryFn: async () => {
-      const res = await client.hello.$post({ json: { name: 'World' } });
-      return res.json();
-    },
-  });
+  const categoryMap = {
+    video: 1,
+    image: 2,
+    quote: 3,
+  };
 
   const filteredItems =
     filter === 'all'
       ? items.data
-      : items.data?.filter((item) => item.type === filter);
+      : items.data?.filter(
+          (item) =>
+            item.category_id === categoryMap[filter as keyof typeof categoryMap]
+        );
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
@@ -46,16 +44,13 @@ export default function InspirationBoard() {
         </h1>
         <div className="flex absolute top-4 right-4 gap-3 items-center">
           <ModeToggle />
-          <Button variant="outline" size="sm" className="hover:bg-primary/10">
-            <Icon icon="mdi:login" className="mr-2 w-4 h-4" />
-            Admin Login
-          </Button>
+          <LoginModal />
         </div>
       </header>
 
       <div className="container flex-grow px-4 mx-auto">
         <div className="flex justify-center mb-12 space-x-6">
-          {['all', 'image', 'quote', 'youtube'].map((value) => (
+          {['all', 'image', 'quote', 'video'].map((value) => (
             <button
               key={value}
               onClick={() => setFilter(value)}
@@ -74,7 +69,7 @@ export default function InspirationBoard() {
               {value === 'quote' && (
                 <Icon icon="mdi:format-quote-close" className="w-4 h-4" />
               )}
-              {value === 'youtube' && (
+              {value === 'video' && (
                 <Icon icon="mdi:youtube" className="w-4 h-4" />
               )}
               <span className="sr-only">
@@ -88,13 +83,16 @@ export default function InspirationBoard() {
           ))}
         </div>
 
-        <TileGrid items={filteredItems ?? []} />
+        <TileGrid
+          items={
+            filteredItems?.map((item) => ({
+              ...item,
+              created_at: new Date(item.created_at),
+            })) ?? []
+          }
+        />
       </div>
       <Button
-        onClick={() => {
-          hello.refetch();
-          console.log(hello.data);
-        }}
         size="icon"
         className="fixed right-8 bottom-8 rounded-full shadow-lg bg-secondary text-secondary-foreground hover:bg-secondary/90"
       >
