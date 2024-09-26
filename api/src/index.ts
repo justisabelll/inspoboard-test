@@ -20,7 +20,7 @@ const app = new Hono<{
 
 app.use(
   cors({
-    origin: 'http://localhost:5174',
+    origin: ['http://localhost:5174', 'http://localhost:5173'],
   })
 );
 
@@ -99,4 +99,4 @@ export type AppRouter = typeof helloRoute &
 
 export default app;
 
-console.log('Hono running on port 3000');
+console.log('Hono 🔥 running on port 3000');

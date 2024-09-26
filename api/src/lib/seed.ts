@@ -1,6 +1,30 @@
 import { db, insportationTable, categoryTable } from '../db';
+import { Database } from 'bun:sqlite';
 
-export const seed = async () => {
+const setup = async () => {
+  const db = new Database('sqlite.db');
+  db.run(`
+      CREATE TABLE IF NOT EXISTS category (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL UNIQUE
+      );
+      CREATE TABLE IF NOT EXISTS insportation (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        content TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        category_id INTEGER NOT NULL,
+        FOREIGN KEY (category_id) REFERENCES category(id)
+      );
+      CREATE TABLE IF NOT EXISTS user (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL,
+        password TEXT NOT NULL,
+        created_at INTEGER NOT NULL
+      );
+    `);
+};
+
+const seed = async () => {
   // Insert categories
   await db
     .insert(categoryTable)
@@ -97,3 +121,9 @@ export const seed = async () => {
     },
   ]);
 };
+
+console.log('🌱 Setting up database... 🌱');
+setup();
+console.log('🌱 Seeding in progress... 🌱');
+seed();
+console.log('Seeding completed successfully! ✅');
