@@ -3,8 +3,9 @@ import type { JwtVariables } from 'hono/jwt';
 import { jwt, sign } from 'hono/jwt';
 import { cors } from 'hono/cors';
 import { Hono } from 'hono';
-import { db, insportationTable } from './db';
+import { db, inspirationTable } from './db';
 import { z } from 'zod';
+import { setCookie } from 'hono/cookie';
 
 type Variables = JwtVariables;
 
@@ -21,13 +22,23 @@ const app = new Hono<{
 app.use(
   cors({
     origin: ['http://localhost:5174', 'http://localhost:5173'],
+    credentials: true,
   })
 );
 
+// app.use(
+//   '/protected/*',
+//   jwt({
+//     secret: JWT_SECRET as string,
+//     cookie: 'auth-token', // Look for the token in the 'auth-token' cookie
+//   })
+// );
+
 app.use(
-  '/protected/*',
+  '/api/protected',
   jwt({
-    secret: JWT_SECRET as string,
+    secret: JWT_SECRET,
+    cookie: 'auth-token', // Look for the token in the 'auth-token' cookie
   })
 );
 
@@ -46,7 +57,7 @@ const helloRoute = app.post(
 );
 
 const itemsRoute = app.get('/items', async (c) => {
-  return c.json(await db.select().from(insportationTable).all());
+  return c.json(await db.select().from(inspirationTable).all());
 });
 
 app.post('/login', async (c) => {
@@ -54,7 +65,17 @@ app.post('/login', async (c) => {
 
   if (username === 'admin' && password === 'admin') {
     const token = await sign({ username }, JWT_SECRET as string);
-    return c.json({ token }, 200);
+
+    // Set the token as an httpOnly cookie
+    setCookie(c, 'auth-token', token, {
+      httpOnly: true,
+      secure: true, // Use this in production
+      sameSite: 'Strict',
+      maxAge: 60 * 60 * 24, // 1 day
+      path: '/',
+    });
+
+    return c.json({ message: 'Logged in successfully' }, 200);
   }
   return c.json({ message: 'Invalid credentials' }, 401);
 });
@@ -65,7 +86,7 @@ app.get('/', (c) => {
 
 app.get('/api/protected', (c) => {
   const payload = c.get('jwtPayload');
-  return c.json({ message: 'This is protected', username: payload.username });
+  return c.json({ message: 'This is protected', payload });
 });
 
 const addItemRoute = app.post(
@@ -81,7 +102,7 @@ const addItemRoute = app.post(
     const { content, category_id } = c.req.valid('json');
 
     try {
-      await db.insert(insportationTable).values({
+      await db.insert(inspirationTable).values({
         content: content,
         category_id: category_id,
         created_at: new Date(),
@@ -92,6 +113,18 @@ const addItemRoute = app.post(
     }
   }
 );
+
+// Add a logout route
+app.post('/logout', (c) => {
+  setCookie(c, 'auth-token', '', {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'Strict',
+    maxAge: 0,
+    path: '/',
+  });
+  return c.json({ message: 'Logged out successfully' }, 200);
+});
 
 export type AppRouter = typeof helloRoute &
   typeof itemsRoute &

@@ -1,7 +1,10 @@
 {
   "name": "@inspoboard/api",
   "scripts": {
-    "dev": "bun run --hot src/index.ts"
+    "dev": "bun run --hot src/index.ts",
+    "db:setup": "bun run src/lib/seed.ts --setup",
+    "db:seed": "bun run src/lib/seed.ts --seed",
+    "db:reset": "bun run src/lib/seed.ts --reset"
   },
   "dependencies": {
     "@hono/zod-validator": "^0.2.2",

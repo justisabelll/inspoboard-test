@@ -10,7 +10,7 @@ const categoryTable = sqliteTable('category', {
   name: text('name').notNull().unique(),
 });
 
-const insportationTable = sqliteTable('insportation', {
+const inspirationTable = sqliteTable('inspiration', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   content: text('content').notNull(),
   created_at: integer('created_at', { mode: 'timestamp' }).notNull(),
@@ -29,11 +29,11 @@ const userTable = sqliteTable('user', {
 // export type DatabaseUser = typeof userTable.$inferSelect;
 
 export type CategorySelectType = typeof categoryTable.$inferSelect;
-export type InsportationSelectType = typeof insportationTable.$inferSelect;
+export type InspirationSelectType = typeof inspirationTable.$inferSelect;
 export type UserSelectType = typeof userTable.$inferSelect;
 
 export type CategoryInsertType = typeof categoryTable.$inferInsert;
-export type InsportationInsertType = typeof insportationTable.$inferInsert;
+export type InspirationInsertType = typeof inspirationTable.$inferInsert;
 export type UserInsertType = typeof userTable.$inferInsert;
 
-export { db, categoryTable, insportationTable, userTable };
+export { db, categoryTable, inspirationTable, userTable };

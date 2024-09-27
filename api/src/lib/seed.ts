@@ -1,4 +1,4 @@
-import { db, insportationTable, categoryTable } from '../db';
+import { db, inspirationTable, categoryTable } from '../db';
 import { Database } from 'bun:sqlite';
 
 const setup = async () => {
@@ -8,7 +8,7 @@ const setup = async () => {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL UNIQUE
       );
-      CREATE TABLE IF NOT EXISTS insportation (
+      CREATE TABLE IF NOT EXISTS inspiration (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         content TEXT NOT NULL,
         created_at INTEGER NOT NULL,
@@ -37,7 +37,7 @@ const seed = async () => {
   const quoteCategoryId = categories.find((c) => c.name === 'quote')?.id;
 
   // Insert insportations
-  await db.insert(insportationTable).values([
+  await db.insert(inspirationTable).values([
     {
       content: 'https://placehold.co/600x400',
       created_at: new Date(),
@@ -115,15 +115,45 @@ const seed = async () => {
       category_id: imageCategoryId!,
     },
     {
-      content: 'The best way to predict the future is to invent it.',
+      content: 'The best way to predict the future is to invent it.1',
       created_at: new Date(),
       category_id: quoteCategoryId!,
     },
   ]);
 };
 
-console.log('🌱 Setting up database... 🌱');
-setup();
-console.log('🌱 Seeding in progress... 🌱');
-seed();
-console.log('Seeding completed successfully! ✅');
+const reset = async () => {
+  await db.delete(inspirationTable);
+  await db.delete(categoryTable).returning();
+
+  const bunDB = new Database('sqlite.db');
+  bunDB.run(`DROP TABLE IF EXISTS category;
+  DROP TABLE IF EXISTS inspiration;
+  DROP TABLE IF EXISTS user;
+  `);
+};
+
+const args = process.argv.slice(2);
+
+switch (args[0]) {
+  case '--setup':
+    console.log('Setting up database...');
+    setup();
+    console.log('Database setup successfully! ✅');
+    break;
+  case '--reset':
+    console.log('Removing all rows...');
+    reset();
+    console.log('Database purged successfully! ✅');
+    break;
+  case '--seed':
+    console.log('Seeding in progress...');
+    seed();
+    console.log('Seeding completed successfully! ✅');
+    break;
+  default:
+    console.log(
+      'Invalid command. Please use one of the following commands: --setup, --purge, --seed'
+    );
+    break;
+}
