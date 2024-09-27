@@ -15,15 +15,41 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { LogIn } from 'lucide-react';
 import { Icon } from '@iconify/react';
+import { toast } from 'sonner';
+import { authStore } from '@/lib/auth-store';
+
 export default function LoginModal() {
   const [open, setOpen] = useState(false);
+  // const isAuthenticated = authStore((state) => state.isAuthenticated);
+  const updateAuth = authStore((state) => state.setAuth);
 
-  const handleLogin = (event: React.FormEvent) => {
-    event.preventDefault();
-    // Add your login logic here
-    console.log('Login attempted');
-    setOpen(false);
-  };
+  async function login(data: FormData) {
+    const username = data.get('username');
+    const password = data.get('password');
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}login`, {
+        method: 'POST',
+        body: JSON.stringify({ username, password }),
+        credentials: 'include', // This is important for including cookies
+      });
+
+      if (response.ok) {
+        toast.success('Logged in successfully');
+        setOpen(false);
+        updateAuth(true);
+      } else {
+        toast.error('Invalid credentials');
+      }
+      //eslint-disable-next-line
+    } catch (error: unknown) {
+      toast.error('An error occurred. Please try again later.');
+    } finally {
+      // setTimeout(() => {
+      //   window.location.reload();
+      // }, 1000);
+    }
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -52,13 +78,14 @@ export default function LoginModal() {
             Enter your credentials to access your account.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleLogin} className="space-y-4">
+        <form action={login} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email" className="text-foreground">
               Email
             </Label>
             <Input
               id="username"
+              name="username"
               type="text"
               placeholder="Username"
               required
@@ -71,6 +98,7 @@ export default function LoginModal() {
             </Label>
             <Input
               id="password"
+              name="password"
               type="password"
               placeholder="Password"
               required

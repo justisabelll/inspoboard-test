@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Icon } from '@iconify/react';
 import { Button } from '@/components/ui/button';
 import { TileGrid } from '@/components/tile-grid';
@@ -8,9 +8,35 @@ import { ModeToggle } from '@/components/mode-toggle';
 import { client } from '@/lib/rpc';
 import { useQuery } from '@tanstack/react-query';
 import LoginModal from '@/components/login-modal';
+import { authStore } from './lib/auth-store';
 
 export default function InspirationBoard() {
   const [filter, setFilter] = useState('all');
+  const auth = authStore((state) => state.isAuthenticated);
+  const updateAuth = authStore((state) => state.setAuth);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}api/protected`,
+          {
+            credentials: 'include',
+          }
+        );
+        if (response.ok) {
+          updateAuth(true); // Use the updater function to trigger re-render
+        } else {
+          updateAuth(false);
+        }
+      } catch (error) {
+        console.error('Authentication check failed:', error);
+        updateAuth(false);
+      }
+    };
+
+    checkAuth();
+  }, [updateAuth]);
 
   const items = useQuery({
     queryKey: ['items'],
@@ -35,6 +61,21 @@ export default function InspirationBoard() {
             item.category_id === categoryMap[filter as keyof typeof categoryMap]
         );
 
+  const handleLogout = async () => {
+    try {
+      await fetch(`${import.meta.env.VITE_API_URL}logout`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      updateAuth(false);
+    } catch (error) {
+      console.error('Logout failed', error);
+    }
+  };
+
+  console.log('auth', auth);
+
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <header className="relative py-16 mb-12">
@@ -44,7 +85,11 @@ export default function InspirationBoard() {
         </h1>
         <div className="flex absolute top-4 right-4 gap-3 items-center">
           <ModeToggle />
-          <LoginModal />
+          {auth ? (
+            <Button onClick={handleLogout}>Logout</Button>
+          ) : (
+            <LoginModal />
+          )}
         </div>
       </header>
 
@@ -92,13 +137,15 @@ export default function InspirationBoard() {
           }
         />
       </div>
-      <Button
-        size="icon"
-        className="fixed right-8 bottom-8 rounded-full shadow-lg bg-secondary text-secondary-foreground hover:bg-secondary/90"
-      >
-        <Icon icon="mdi:plus" className="w-5 h-5" />
-        <span className="sr-only">Add Inspiration</span>
-      </Button>
+      {auth && (
+        <Button
+          size="icon"
+          className="fixed right-8 bottom-8 rounded-full shadow-lg bg-secondary text-secondary-foreground hover:bg-secondary/90"
+        >
+          <Icon icon="mdi:plus" className="w-5 h-5" />
+          <span className="sr-only">Add Inspiration</span>
+        </Button>
+      )}
     </div>
   );
 }

@@ -23,10 +23,13 @@
     "clsx": "^2.1.1",
     "framer-motion": "^11.5.6",
     "lucide-react": "^0.445.0",
+    "next-themes": "^0.3.0",
     "react": "^19.0.0-rc-e740d4b1-20240919",
     "react-dom": "^19.0.0-rc-e740d4b1-20240919",
+    "sonner": "^1.5.0",
     "tailwind-merge": "^2.5.2",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "zustand": "^5.0.0-rc.2"
   },
   "overrides": {
     "@types/react": "npm:types-react@rc",
