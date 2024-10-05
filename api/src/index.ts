@@ -35,7 +35,7 @@ app.use(
 // );
 
 app.use(
-  '/api/protected',
+  '/protected/*',
   jwt({
     secret: JWT_SECRET,
     cookie: 'auth-token', // Look for the token in the 'auth-token' cookie
@@ -80,11 +80,7 @@ app.post('/login', async (c) => {
   return c.json({ message: 'Invalid credentials' }, 401);
 });
 
-app.get('/', (c) => {
-  return c.text('Hello Hono!');
-});
-
-app.get('/api/protected', (c) => {
+app.get('/protected/auth-check', (c) => {
   const payload = c.get('jwtPayload');
   return c.json({ message: 'This is protected', payload });
 });

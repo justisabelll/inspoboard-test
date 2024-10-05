@@ -19,19 +19,18 @@ export default function InspirationBoard() {
     const checkAuth = async () => {
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL}api/protected`,
+          `${import.meta.env.VITE_API_URL}/protected/auth-check`,
           {
             credentials: 'include',
           }
         );
         if (response.ok) {
-          updateAuth(true); // Use the updater function to trigger re-render
-        } else {
+          updateAuth(true);
+        } else if (response.status === 401) {
           updateAuth(false);
         }
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Authentication check failed:', error);
-        updateAuth(false);
       }
     };
 
@@ -43,6 +42,7 @@ export default function InspirationBoard() {
     queryFn: async () => {
       const res = await client.items.$get();
       const data = await res.json();
+
       return data;
     },
   });
@@ -73,8 +73,6 @@ export default function InspirationBoard() {
       console.error('Logout failed', error);
     }
   };
-
-  console.log('auth', auth);
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
