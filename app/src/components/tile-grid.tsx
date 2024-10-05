@@ -1,10 +1,10 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Icon } from '@iconify/react';
 
-import { InsportationSelectType } from '../../../api/src/db';
+import { InspirationSelectType } from '../../../api/src/db';
 
 interface TileGridProps {
-  items: InsportationSelectType[];
+  items: InspirationSelectType[];
 }
 
 export function TileGrid({ items }: TileGridProps) {
@@ -23,7 +23,7 @@ export function TileGrid({ items }: TileGridProps) {
   );
 }
 
-function Tile({ item }: { item: InsportationSelectType }) {
+function Tile({ item }: { item: InspirationSelectType }) {
   return (
     <motion.div
       layout
