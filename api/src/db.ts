@@ -13,6 +13,7 @@ const categoryTable = sqliteTable('category', {
 const inspirationTable = sqliteTable('inspiration', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   content: text('content').notNull(),
+  source: text('source'),
   created_at: integer('created_at', { mode: 'timestamp' }).notNull(),
   category_id: integer('category_id')
     .notNull()

@@ -97,7 +97,7 @@ export default function InspirationBoard() {
             <button
               key={value}
               onClick={() => setFilter(value)}
-              className={`p-2 transition-all duration-300 ${
+              className={`p-2 transition-all duration-150 ${
                 filter === value
                   ? 'text-primary border-b-2 border-primary'
                   : 'text-muted-foreground hover:text-foreground'
