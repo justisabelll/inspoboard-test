@@ -3,9 +3,10 @@ import type { JwtVariables } from 'hono/jwt';
 import { jwt, sign } from 'hono/jwt';
 import { cors } from 'hono/cors';
 import { Hono } from 'hono';
-import { db, inspirationTable } from './db';
+import { db, inspirationTable, categoryTable } from './db';
 import { z } from 'zod';
 import { setCookie } from 'hono/cookie';
+import { eq } from 'drizzle-orm';
 
 type Variables = JwtVariables;
 
@@ -60,6 +61,10 @@ const itemsRoute = app.get('/items', async (c) => {
   return c.json(await db.select().from(inspirationTable).all());
 });
 
+const categoriesRoute = app.get('/categories', async (c) => {
+  return c.json(await db.select().from(categoryTable).all());
+});
+
 app.post('/login', async (c) => {
   const { username, password } = await c.req.json();
 
@@ -70,7 +75,7 @@ app.post('/login', async (c) => {
     setCookie(c, 'auth-token', token, {
       httpOnly: true,
       secure: true, // Use this in production
-      sameSite: 'Strict',
+      sameSite: 'strict',
       maxAge: 60 * 60 * 24, // 1 day
       path: '/',
     });
@@ -90,25 +95,40 @@ const addItemRoute = app.post(
   zValidator(
     'json',
     z.object({
-      content: z.string().min(1, { message: 'Content is required' }),
-      category_id: z.number().min(1, { message: 'Category ID is required' }),
+      item: z.object({
+        content: z.string().min(1, { message: 'Content is required' }),
+        category: z.object({
+          id: z.number().min(1, { message: 'Category ID is required' }),
+          name: z.string().min(1, { message: 'Category name is required' }),
+        }),
+        source: z.string().min(1).optional(),
+      }),
     })
   ),
   async (c) => {
-    const { content, category_id } = c.req.valid('json');
-
+    const { item } = c.req.valid('json');
     try {
       await db.insert(inspirationTable).values({
-        content: content,
-        category_id: category_id,
+        content: item.content,
+        category_id: item.category.id,
+        source: item.source,
         created_at: new Date(),
       });
       return c.json({ message: 'Item added' }, 200);
     } catch (error) {
+      console.log('error', error);
       return c.json({ message: 'Error adding item' }, 500);
     }
   }
 );
+
+const deleteItemRoute = app.delete('/protected/delete-item/:id', async (c) => {
+  const id = c.req.param('id');
+  await db
+    .delete(inspirationTable)
+    .where(eq(inspirationTable.id, parseInt(id)));
+  return c.json({ message: 'Item deleted' }, 200);
+});
 
 // Add a logout route
 app.post('/logout', (c) => {
@@ -124,7 +144,9 @@ app.post('/logout', (c) => {
 
 export type AppRouter = typeof helloRoute &
   typeof itemsRoute &
-  typeof addItemRoute;
+  typeof addItemRoute &
+  typeof deleteItemRoute &
+  typeof categoriesRoute;
 
 export default app;
 
