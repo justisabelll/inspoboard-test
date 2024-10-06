@@ -9,6 +9,8 @@ import { client } from '@/lib/rpc';
 import { useQuery } from '@tanstack/react-query';
 import LoginModal from '@/components/login-modal';
 import { authStore } from './lib/auth-store';
+import NewInspiration from '@/components/new-inspo';
+import { InspirationType } from '@/components/new-inspo';
 
 export default function InspirationBoard() {
   const [filter, setFilter] = useState('all');
@@ -47,23 +49,28 @@ export default function InspirationBoard() {
     },
   });
 
-  const categoryMap = {
-    video: 1,
-    image: 2,
-    quote: 3,
-  };
+  const categories = useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const res = await client.categories.$get();
+      const data = await res.json();
+
+      return data;
+    },
+  });
 
   const filteredItems =
     filter === 'all'
       ? items.data
       : items.data?.filter(
           (item) =>
-            item.category_id === categoryMap[filter as keyof typeof categoryMap]
+            item.category_id ===
+            categories.data?.find((category) => category.name === filter)?.id
         );
 
   const handleLogout = async () => {
     try {
-      await fetch(`${import.meta.env.VITE_API_URL}logout`, {
+      await fetch(`${import.meta.env.VITE_API_URL}/logout`, {
         method: 'POST',
         credentials: 'include',
       });
@@ -128,7 +135,7 @@ export default function InspirationBoard() {
 
         <TileGrid
           items={
-            filteredItems?.map((item) => ({
+            filteredItems?.map((item: InspirationType) => ({
               ...item,
               created_at: new Date(item.created_at),
             })) ?? []
@@ -140,7 +147,7 @@ export default function InspirationBoard() {
           size="icon"
           className="fixed right-8 bottom-8 rounded-full shadow-lg bg-secondary text-secondary-foreground hover:bg-secondary/90"
         >
-          <Icon icon="mdi:plus" className="w-5 h-5" />
+          <NewInspiration categories={categories.data ?? []} />
           <span className="sr-only">Add Inspiration</span>
         </Button>
       )}

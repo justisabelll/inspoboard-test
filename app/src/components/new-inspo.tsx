@@ -23,7 +23,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-import { client } from '@/lib/rpc';
 import { useMutation } from '@tanstack/react-query';
 import { CategorySelectType } from '../../../api/src/db';
 
