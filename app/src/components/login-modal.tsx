@@ -28,7 +28,7 @@ export default function LoginModal() {
     const password = data.get('password');
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}login`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/login`, {
         method: 'POST',
         body: JSON.stringify({ username, password }),
         credentials: 'include', // This is important for including cookies
@@ -80,8 +80,8 @@ export default function LoginModal() {
         </DialogHeader>
         <form action={login} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-foreground">
-              Email
+            <Label htmlFor="username" className="text-foreground">
+              Username
             </Label>
             <Input
               id="username"
