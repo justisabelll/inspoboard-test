@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <radialGradient id="sparkleGradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFA500;stop-opacity:1" />
+    </radialGradient>
+  </defs>
+  
+  <!-- Large central sparkle -->
+  <path d="M50 10 L55 40 L85 45 L55 50 L50 80 L45 50 L15 45 L45 40 Z" fill="url(#sparkleGradient)">
+    <animate attributeName="opacity" values="1;0.5;1" dur="2s" repeatCount="indefinite" />
+  </path>
+  
+  <!-- Smaller sparkles -->
+  <path d="M20 20 L22 30 L32 32 L22 34 L20 44 L18 34 L8 32 L18 30 Z" fill="url(#sparkleGradient)">
+    <animate attributeName="opacity" values="1;0.5;1" dur="1.5s" repeatCount="indefinite" />
+  </path>
+  
+  <path d="M80 20 L82 30 L92 32 L82 34 L80 44 L78 34 L68 32 L78 30 Z" fill="url(#sparkleGradient)">
+    <animate attributeName="opacity" values="1;0.5;1" dur="1.8s" repeatCount="indefinite" />
+  </path>
+  
+  <path d="M20 80 L22 90 L32 92 L22 94 L20 104 L18 94 L8 92 L18 90 Z" fill="url(#sparkleGradient)">
+    <animate attributeName="opacity" values="1;0.5;1" dur="1.7s" repeatCount="indefinite" />
+  </path>
+</svg>
