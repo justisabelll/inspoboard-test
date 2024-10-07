@@ -1,7 +1,7 @@
 import { db, inspirationTable, categoryTable, userTable } from '../db';
 import { Database } from 'bun:sqlite';
 import { drizzle } from 'drizzle-orm/bun-sqlite';
-import { unlinkSync } from 'node:fs';
+import { unlinkSync, existsSync } from 'node:fs';
 
 const main = async () => {
   const args = process.argv.slice(2);
@@ -10,7 +10,6 @@ const main = async () => {
     case '--setup':
       console.log('Setting up database...');
       await setup();
-      console.log('Database setup successfully! ✅');
       break;
     case '--reset':
       console.log('Removing all rows...');
@@ -20,7 +19,6 @@ const main = async () => {
     case '--seed':
       console.log('Seeding in progress...');
       await seed();
-      console.log('Seeding completed successfully! ✅');
       break;
     case '--delete':
       console.log('Deleting database...');
@@ -36,8 +34,15 @@ const main = async () => {
 };
 
 const setup = async () => {
-  console.log('Setting up tables...');
-  const sqlite = new Database('./sqlite.db');
+  const dbPath = './sqlite.db';
+
+  if (existsSync(dbPath)) {
+    console.log('Database already exists. Skipping setup.');
+    return;
+  }
+
+  console.log('Setting up database...');
+  const sqlite = new Database(dbPath);
   sqlite.run(`
     CREATE TABLE IF NOT EXISTS category (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -58,11 +63,24 @@ const setup = async () => {
       created_at INTEGER NOT NULL
     );
   `);
+  console.log('Database setup successfully.');
 };
 
 const seed = async () => {
   const sqlite = new Database(process.env.DATABASE_URL);
   const db = drizzle(sqlite);
+
+  // Check if there's any data in the database
+  const existingCategories = await db.select().from(categoryTable).all();
+  const existingInspirations = await db.select().from(inspirationTable).all();
+
+  if (existingCategories.length > 0 || existingInspirations.length > 0) {
+    console.log('Database already contains data. Skipping seed operation.');
+    return;
+  }
+
+  // If no data exists, proceed with seeding
+  console.log('Seeding database...');
 
   // Insert categories
   await db
@@ -172,6 +190,8 @@ const seed = async () => {
       category_id: quoteCategoryId!,
     },
   ]);
+
+  console.log('Database seeded successfully.');
 };
 
 const reset = async () => {

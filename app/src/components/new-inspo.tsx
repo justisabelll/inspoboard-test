@@ -1,5 +1,3 @@
-'use client';
-
 import { useState } from 'react';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -53,7 +51,6 @@ export interface InspirationType {
 }
 
 import { toast } from 'sonner';
-import Cookies from 'js-cookie';
 
 export default function NewInspiration({
   categories,

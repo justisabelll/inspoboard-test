@@ -106,7 +106,7 @@ const addItemRoute = app.post(
           id: z.number().min(1, { message: 'Category ID is required' }),
           name: z.string().min(1, { message: 'Category name is required' }),
         }),
-        source: z.string().min(1).optional(),
+        source: z.string().optional(),
       }),
     })
   ),
@@ -116,7 +116,7 @@ const addItemRoute = app.post(
       await db.insert(inspirationTable).values({
         content: item.content,
         category_id: item.category.id,
-        source: item.source,
+        source: item.source ?? null,
         created_at: new Date(),
       });
       return c.json({ message: 'Item added' }, 200);

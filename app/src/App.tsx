@@ -1,5 +1,3 @@
-'use client';
-
 import { useEffect, useState } from 'react';
 import { Icon } from '@iconify/react';
 import { Button } from '@/components/ui/button';
@@ -11,6 +9,7 @@ import LoginModal from '@/components/login-modal';
 import { authStore } from './lib/auth-store';
 import NewInspiration from '@/components/new-inspo';
 import { InspirationType } from '@/components/new-inspo';
+import { Toaster } from '@/components/ui/sonner';
 
 export default function InspirationBoard() {
   const [filter, setFilter] = useState('all');
@@ -151,6 +150,7 @@ export default function InspirationBoard() {
           <span className="sr-only">Add Inspiration</span>
         </Button>
       )}
+      <Toaster />
     </div>
   );
 }
