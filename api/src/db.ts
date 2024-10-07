@@ -2,7 +2,7 @@ import { drizzle } from 'drizzle-orm/bun-sqlite';
 import { Database } from 'bun:sqlite';
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
 
-const sqlite = new Database('./sqlite.db');
+const sqlite = new Database(process.env.DATABASE_URL);
 const db = drizzle(sqlite);
 
 const categoryTable = sqliteTable('category', {

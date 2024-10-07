@@ -10,10 +10,10 @@ import { eq } from 'drizzle-orm';
 
 type Variables = JwtVariables;
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const API_JWT_SECRET = process.env.API_JWT_SECRET;
 
-if (!JWT_SECRET) {
-  throw new Error('JWT_SECRET is not set');
+if (!API_JWT_SECRET) {
+  throw new Error('API_JWT_SECRET is not set');
 }
 
 const app = new Hono<{
@@ -22,7 +22,7 @@ const app = new Hono<{
 
 app.use(
   cors({
-    origin: ['http://localhost:5174', 'http://localhost:5173'],
+    origin: ['http://localhost:5173'], // Allow requests from the frontend
     credentials: true,
   })
 );
@@ -38,10 +38,15 @@ app.use(
 app.use(
   '/protected/*',
   jwt({
-    secret: JWT_SECRET,
+    secret: API_JWT_SECRET,
     cookie: 'auth-token', // Look for the token in the 'auth-token' cookie
   })
 );
+
+app.get('/', (c) => {
+  const data = db.select().from(inspirationTable).all();
+  return c.json({ message: 'Hello World', data }, 200);
+});
 
 const helloRoute = app.post(
   '/hello',
@@ -69,7 +74,7 @@ app.post('/login', async (c) => {
   const { username, password } = await c.req.json();
 
   if (username === 'admin' && password === 'admin') {
-    const token = await sign({ username }, JWT_SECRET as string);
+    const token = await sign({ username }, API_JWT_SECRET as string);
 
     // Set the token as an httpOnly cookie
     setCookie(c, 'auth-token', token, {

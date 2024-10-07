@@ -1,5 +1,7 @@
-import { db, inspirationTable, categoryTable } from '../db';
+import { db, inspirationTable, categoryTable, userTable } from '../db';
 import { Database } from 'bun:sqlite';
+import { drizzle } from 'drizzle-orm/bun-sqlite';
+import { unlinkSync } from 'node:fs';
 
 const main = async () => {
   const args = process.argv.slice(2);
@@ -20,6 +22,11 @@ const main = async () => {
       await seed();
       console.log('Seeding completed successfully! ✅');
       break;
+    case '--delete':
+      console.log('Deleting database...');
+      await deleteDb();
+      console.log('Database deleted successfully! ✅');
+      break;
     default:
       console.log(
         'Invalid command. Please use one of the following commands: --setup, --reset, --seed'
@@ -29,30 +36,34 @@ const main = async () => {
 };
 
 const setup = async () => {
-  const db = new Database('sqlite.db');
-  db.run(`
-      CREATE TABLE IF NOT EXISTS category (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL UNIQUE
-      );
-      CREATE TABLE IF NOT EXISTS inspiration (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        content TEXT NOT NULL,
-        source TEXT,
-        created_at INTEGER NOT NULL,
-        category_id INTEGER NOT NULL,
-        FOREIGN KEY (category_id) REFERENCES category(id)
-      );
-      CREATE TABLE IF NOT EXISTS user (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT NOT NULL,
-        password TEXT NOT NULL,
-        created_at INTEGER NOT NULL
-      );
-    `);
+  console.log('Setting up tables...');
+  const sqlite = new Database('./sqlite.db');
+  sqlite.run(`
+    CREATE TABLE IF NOT EXISTS category (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL UNIQUE
+    );
+    CREATE TABLE IF NOT EXISTS inspiration (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      content TEXT NOT NULL,
+      source TEXT,
+      created_at INTEGER NOT NULL,
+      category_id INTEGER NOT NULL,
+      FOREIGN KEY (category_id) REFERENCES category(id)
+    );
+    CREATE TABLE IF NOT EXISTS user (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      username TEXT NOT NULL,
+      password TEXT NOT NULL,
+      created_at INTEGER NOT NULL
+    );
+  `);
 };
 
 const seed = async () => {
+  const sqlite = new Database(process.env.DATABASE_URL);
+  const db = drizzle(sqlite);
+
   // Insert categories
   await db
     .insert(categoryTable)
@@ -64,7 +75,7 @@ const seed = async () => {
   const imageCategoryId = categories.find((c) => c.name === 'image')?.id;
   const quoteCategoryId = categories.find((c) => c.name === 'quote')?.id;
 
-  // Insert insportations
+  // Insert inspirations
   await db.insert(inspirationTable).values([
     {
       content: 'https://placehold.co/600x400',
@@ -164,14 +175,23 @@ const seed = async () => {
 };
 
 const reset = async () => {
-  await db.delete(inspirationTable);
-  await db.delete(categoryTable).returning();
+  const sqlite = new Database(process.env.DATABASE_URL);
+  const db = drizzle(sqlite);
 
-  const bunDB = new Database('sqlite.db');
-  bunDB.run(`DROP TABLE IF EXISTS category;
-  DROP TABLE IF EXISTS inspiration;
-  DROP TABLE IF EXISTS user;
+  await db.delete(inspirationTable);
+  await db.delete(categoryTable);
+  await db.delete(userTable);
+
+  sqlite.run(`
+    DROP TABLE IF EXISTS category;
+    DROP TABLE IF EXISTS inspiration;
+    DROP TABLE IF EXISTS user;
   `);
+};
+
+const deleteDb = async () => {
+  const path = './sqlite.db';
+  unlinkSync(path);
 };
 
 main();

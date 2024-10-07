@@ -2,3 +2,4 @@ node_modules
 api/sqlite.db
 api/.env
 app/.env
+.env

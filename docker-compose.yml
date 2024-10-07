@@ -1,0 +1,51 @@
+version: '3'
+services:
+  libsql:
+    image: ghcr.io/tursodatabase/libsql-server:latest
+    ports:
+      - '8080:8080'
+    platform: linux/amd64
+    environment:
+      - SQLD_NODE=primary
+      - SQLD_HTTP_LISTEN_ADDR=0.0.0.0:8080
+      - SQLD_DB_PATH=/data/libsql
+      - SQLD_HTTP_AUTH=basic:${SQLD_HTTP_AUTH}
+    volumes:
+      - libsql_data:/data/libsql
+    env_file:
+      - .env
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8080']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  backend:
+    build:
+      context: ./api
+      target: production
+    ports:
+      - '3001:3001'
+    depends_on:
+      - libsql
+    env_file:
+      - .env
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3001/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  frontend:
+    build:
+      context: ./app
+      target: production
+    ports:
+      - '3000:3000'
+    depends_on:
+      - backend
+    env_file:
+      - .env
+
+volumes:
+  libsql_data:
