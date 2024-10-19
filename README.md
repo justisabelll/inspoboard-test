@@ -1,6 +1,6 @@
-# inspoboard
+# inspoboard-test (react-19)
 
-i wanted a place to collect images, quotes, and videos that inspire me, that i can come back and look at whenever i want.
+little react-19 app to test out some ideas, probably will redo this with next.js
 
 ## requirements
 
