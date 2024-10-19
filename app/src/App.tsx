@@ -30,8 +30,8 @@ export default function InspirationBoard() {
         } else if (response.status === 401) {
           updateAuth(false);
         }
-      } catch (error: unknown) {
-        console.error('Authentication check failed:', error);
+      } catch (error) {
+        throw new Error('Authentication check failed:', { cause: error });
       }
     };
 

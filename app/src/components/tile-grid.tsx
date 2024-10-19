@@ -12,7 +12,7 @@ const getYouTubeVideoThumbnail = (url: string) => {
   const regex = /[?&]v=([^&]+)/;
   const match = url.match(regex);
   const videoId = match ? match[1] : null;
-  return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg `;
+  return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
 };
 
 export function TileGrid({ items }: TileGridProps) {

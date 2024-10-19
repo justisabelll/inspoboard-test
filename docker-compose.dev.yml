@@ -12,6 +12,11 @@ services:
       - .env
     environment:
       - DATABASE_URL=${DATABASE_URL}
+      - SITEOWNER_USERNAME=${SITEOWNER_USERNAME}
+      - SITEOWNER_PASSWORD=${SITEOWNER_PASSWORD}
+      - API_JWT_SECRET=${API_JWT_SECRET}
+      - FRONTEND_URL=${FRONTEND_URL}
+      - UPLOADTHING_TOKEN=${UPLOADTHING_TOKEN}
       - NODE_ENV=development
     networks:
       - app-network

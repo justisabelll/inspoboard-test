@@ -22,6 +22,7 @@
     "@tanstack/react-query": "^5.56.2",
     "@types/react": "npm:types-react@rc",
     "@types/react-dom": "npm:types-react-dom@rc",
+    "@uploadthing/react": "^7.0.2",
     "@vidstack/react": "^1.12.11",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
@@ -36,6 +37,7 @@
     "sonner": "^1.5.0",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
+    "uploadthing": "^7.0.2",
     "zod": "^3.23.8",
     "zustand": "^5.0.0-rc.2"
   },

@@ -37,6 +37,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 import { Icon } from '@iconify/react';
+import { UploadButton } from '@uploadthing/react';
 
 const formSchema = z.object({
   content: z.string().min(1, 'Content is required'),
@@ -68,7 +69,6 @@ export default function NewInspiration({
     },
   });
 
-  // for some reason hono rpc was not sending the cookies with the request so had to do it this way
   const mutation = useMutation({
     mutationFn: async (data: InspirationType) => {
       try {
@@ -106,6 +106,31 @@ export default function NewInspiration({
       console.error('Error adding item:', error);
     },
   });
+
+  const optimizeAndUpload = async (file: File): Promise<File> => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(
+      `${import.meta.env.VITE_API_URL}/protected/optimize-image`,
+      {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error('Image optimization failed');
+    }
+
+    const optimizedBlob = await response.blob();
+    return new File(
+      [optimizedBlob],
+      file.name.replace(/\.[^/.]+$/, '') + '.webp',
+      { type: 'image/webp' }
+    );
+  };
 
   function onSubmit(data: z.infer<typeof formSchema>) {
     const selectedCategory = categories.find(
@@ -205,6 +230,31 @@ export default function NewInspiration({
                 </FormItem>
               )}
             />
+            <UploadButton
+              endpoint="imageUploader"
+              onBeforeUploadBegin={async (files: File[]) => {
+                try {
+                  const optimizedFiles = await Promise.all(
+                    files.map(optimizeAndUpload)
+                  );
+                  toast.success('Images optimized successfully');
+                  return optimizedFiles;
+                } catch (error) {
+                  toast.error('Error optimizing images');
+                  console.error('Error optimizing images:', error);
+                  return files; // Fall back to original files if optimization fails
+                }
+              }}
+              onClientUploadComplete={(res) => {
+                toast.success('Upload Completed');
+                console.log('Files: ', res);
+                // Here you can add logic to update the form with the uploaded file URLs if needed
+              }}
+              onUploadError={(error: Error) => {
+                toast.error(`Upload ERROR! ${error.message}`);
+              }}
+            />
+
             <div className="flex justify-end space-x-2 pt-4">
               <Button variant="outline" onClick={() => setOpen(false)}>
                 Cancel

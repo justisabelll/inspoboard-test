@@ -9,6 +9,7 @@ const main = async () => {
   switch (args[0]) {
     case '--setup':
       console.log('Setting up database...');
+
       await setup();
       break;
     case '--reset':
